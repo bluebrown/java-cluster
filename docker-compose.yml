@@ -16,7 +16,7 @@ services:
 
   worker:
     expose:
-      - "8009"
+      - "8080"
     build: tomcat/.
     deploy:
       replicas: 3
