@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+
+  memcache:
+    image: memcached
+    deploy:
+      replicas: 1
+
+  loadbalancer:
+    build: haproxy/.
+    ports:
+      - 80:80
+      - 443:443
+    deploy:
+      replicas: 1
+
+  worker:
+    expose:
+      - "8009"
+    build: tomcat/.
+    deploy:
+      replicas: 3
+    depends_on:
+      - memcache
