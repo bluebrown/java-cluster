@@ -9,9 +9,10 @@
   <!-- shared memchaced session with default java serializer -->
   <Manager 
     className="de.javakaffee.web.msm.MemcachedBackupSessionManager" 
-    memcachedNodes="n1:memcache:11211" 
+    memcachedNodes="n1:memcache_manager:11211,n2:memcache:11211"
+    failoverNodes="n1"
+    storageKeyPrefix="context.hash"
     requestUriIgnorePattern=".*\.(ico|png|gif|jpg|css|js)$" 
     transcoderFactoryClass="de.javakaffee.web.msm.JavaSerializationTranscoderFactory" 
   />
 </Context>
-

@@ -1,24 +1,30 @@
 version: '3.8'
 services:
 
-  memcache:
-    image: memcached
-    deploy:
-      replicas: 1
-
   loadbalancer:
     build: haproxy/.
     ports:
       - 80:80
       - 443:443
     deploy:
-      replicas: 1
+      mode: gloabl
 
   worker:
     expose:
       - "8080"
     build: tomcat/.
     deploy:
-      replicas: 3
+      replicas: 4
     depends_on:
       - memcache
+      - memcache_manager
+
+  memcache: &memcache
+    image: memcached
+
+  memcache_manager: 
+    <<: *memcache
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
