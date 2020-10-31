@@ -1,24 +1,50 @@
-version: '3.8'
+version: "3.8"
+
 services:
 
-  memcache:
-    image: memcached
+  traefik:
+    image: "traefik"
+    container_name: "traefik"
     deploy:
-      replicas: 1
-
-  loadbalancer:
-    build: haproxy/.
+      placement:
+        constraints:
+          - node.role == manager
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
     ports:
-      - 80:80
-      - 443:443
-    deploy:
-      replicas: 1
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  worker:
-    expose:
-      - "8080"
+  tomcat:
     build: tomcat/.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.http.routers.tomcat.entrypoints=web"
+      - "traefik.http.routers.tomcat.rule=PathPrefix(`/`)"
+      - "traefik.backend.loadbalancer.sticky=true"
     deploy:
-      replicas: 3
-    depends_on:
-      - memcache
+      replicas: 2
+    environment: 
+      - "TESTENV:={{.Task.Slot}}"
+
+  memcache: &memcache
+    image: memcached
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=12211"
+      - "traefik.protocol=udp"
+
+  memcache_manager: 
+    <<: *memcache
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      
