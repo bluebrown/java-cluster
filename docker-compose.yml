@@ -4,8 +4,7 @@ services:
   loadbalancer:
     build: haproxy/.
     ports:
-      - 80:80
-      - 443:443
+      - 1080:80
     deploy:
       mode: gloabl
 
@@ -14,7 +13,7 @@ services:
       - "8080"
     build: tomcat/.
     deploy:
-      replicas: 4
+      replicas: 2
     depends_on:
       - memcache
       - memcache_manager
